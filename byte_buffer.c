@@ -197,10 +197,6 @@ int bb_to_bb(byte_buffer *out, byte_buffer *in, uint64_t count) {
 }
 
 ssize_t bb_write_from_fd(byte_buffer *buf, int socket_fd) {
-    if (bb_check_size(buf, 4096)) {
-        return -1;
-    }
-
     ssize_t res = read(socket_fd, buf->write_pos, buf->write_limit);
     if (res > 0) {
         bb_update_write(buf, (uint64_t) res);
