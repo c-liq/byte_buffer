@@ -3,10 +3,10 @@ An implementation of a byte buffer-ish data structure in C that maintains read
 and write positions, with support for common uses cases built in (serializing integers, 
 reading/write to and from file descriptors).
 
-##Usage
+## Usage
 
 
-###Initialisation
+### Initialisation
 
 As well as a capacity argument, the initialisation functions take a _resizable_ flag,
 indicating whether or not the buffer should grow if necessary to accomodate a write operation:
@@ -37,7 +37,7 @@ byte_buffer buf_copy;
 bb_copy(&buf_copy, &buf);
 byte_buffer *buf_copy_ptr = bb_copy_alloc(buf_copy_ptr, &buf);
 ````
-###Reading and Writing
+### Reading and Writing
 There are three main pairs of functions to read and write from/to a buffer. _bb_read_ and _bb_write_ access an 
 abritrary number of bytes in an array. Additionally there are functions with _u64 suffixes for unsigned 64 bit integers, 
 and _fd to read and write from file descriptors. All read and write functions return 0 on success, and -1 on failure. In the case of writing, failure
