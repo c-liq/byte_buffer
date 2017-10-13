@@ -1,14 +1,12 @@
 #include "byte_buffer.h"
 
-static inline void bb_update_read(byte_buffer *buf, uint64_t count)
-{
+static inline void bb_update_read(byte_buffer *buf, uint64_t count) {
     buf->read_pos += count;
     buf->read += count;
     buf->read_limit -= count;
 }
 
-static inline void bb_update_write(byte_buffer *buf, uint64_t count)
-{
+static inline void bb_update_write(byte_buffer *buf, uint64_t count) {
     buf->write_pos += count;
     buf->write_limit -= count;
     buf->written += count;
@@ -16,10 +14,6 @@ static inline void bb_update_write(byte_buffer *buf, uint64_t count)
 }
 
 int bb_check_size(byte_buffer *buf, uint64_t count) {
-    if (!buf) {
-        return -1;
-    }
-
     if (count <= buf->write_limit) {
         return 0;
     }
@@ -43,23 +37,18 @@ int bb_check_size(byte_buffer *buf, uint64_t count) {
     return 0;
 }
 
-int bb_compact(byte_buffer *buf)
-{
-    if (buf->read == 0) {
-        return 0;
-    }
-
+int bb_compact(byte_buffer *buf) {
     memcpy(buf->data, buf->read_pos, buf->read_limit);
     buf->write_pos = buf->data + buf->read_limit;
     buf->read = 0;
+    buf->written = buf->read_limit;
     buf->read_pos = buf->data;
     buf->write_limit = buf->capacity - buf->read_limit;
 
     return 0;
 }
 
-int bb_read(uint8_t *out, byte_buffer *buf, uint64_t count)
-{
+int bb_read(uint8_t *out, byte_buffer *buf, uint64_t count) {
     if (buf->read_limit < count) {
         return -1;
     }
@@ -69,8 +58,7 @@ int bb_read(uint8_t *out, byte_buffer *buf, uint64_t count)
     return 0;
 }
 
-int bb_write_u64(byte_buffer *buf, uint64_t num)
-{
+int bb_write_u64(byte_buffer *buf, uint64_t num) {
     if (bb_check_size(buf, sizeof num)) {
         return -1;
     }
@@ -89,8 +77,7 @@ int bb_write_u64(byte_buffer *buf, uint64_t num)
     return 0;
 }
 
-int bb_read_u64(uint64_t *out, byte_buffer *buf)
-{
+int bb_read_u64(uint64_t *out, byte_buffer *buf) {
     if (buf->read_limit < sizeof out) {
 
         return -1;
@@ -111,8 +98,7 @@ int bb_read_u64(uint64_t *out, byte_buffer *buf)
     return 0;
 }
 
-int bb_write(byte_buffer *buf, uint8_t *data, size_t count)
-{
+int bb_write(byte_buffer *buf, uint8_t *data, size_t count) {
     if (bb_check_size(buf, count)) {
         return -1;
     }
@@ -122,8 +108,7 @@ int bb_write(byte_buffer *buf, uint8_t *data, size_t count)
     return 0;
 }
 
-uint8_t *bb_write_virtual(byte_buffer *buf, uint64_t count)
-{
+uint8_t *bb_write_virtual(byte_buffer *buf, uint64_t count) {
     if (bb_check_size(buf, count)) {
         return NULL;
     }
@@ -133,8 +118,7 @@ uint8_t *bb_write_virtual(byte_buffer *buf, uint64_t count)
     return ptr;
 }
 
-uint8_t *bb_read_virtual(byte_buffer *buf, uint64_t count)
-{
+uint8_t *bb_read_virtual(byte_buffer *buf, uint64_t count) {
     if (buf->read_limit < count) {
         return NULL;
     }
@@ -178,8 +162,7 @@ int bb_slice(byte_buffer_t out, byte_buffer_t in, uint64_t count) {
     return 0;
 }
 
-int bb_init(byte_buffer *buf, uint64_t capacity, bool resizable)
-{
+int bb_init(byte_buffer *buf, uint64_t capacity, bool resizable) {
     if (!buf) return -1;
 
     buf->capacity = capacity;
@@ -213,8 +196,7 @@ int bb_to_bb(byte_buffer *out, byte_buffer *in, uint64_t count) {
     return 0;
 }
 
-ssize_t bb_write_from_fd(byte_buffer *buf, int socket_fd)
-{
+ssize_t bb_write_from_fd(byte_buffer *buf, int socket_fd) {
     if (bb_check_size(buf, 4096)) {
         return -1;
     }
@@ -227,8 +209,7 @@ ssize_t bb_write_from_fd(byte_buffer *buf, int socket_fd)
     return res;
 }
 
-ssize_t bb_read_to_fd(byte_buffer *buf, int socket_fd)
-{
+ssize_t bb_read_to_fd(byte_buffer *buf, int socket_fd) {
     ssize_t res = write(socket_fd, buf->read_pos, buf->read_limit);
     if (res > 0) {
         bb_update_read(buf, (uint64_t) res);
@@ -323,8 +304,7 @@ void bb_reset_zero(byte_buffer *buf) {
     memset(buf->data, 0, buf->capacity);
 }
 
-void bb_clear(byte_buffer *buf)
-{
+void bb_clear(byte_buffer *buf) {
     if (buf->alloced) {
         free(buf->data);
     }
@@ -339,8 +319,7 @@ void bb_clear(byte_buffer *buf)
     buf->written = 0;
 }
 
-void bb_free(byte_buffer *buf)
-{
+void bb_free(byte_buffer *buf) {
     bb_clear(buf);
     free(buf);
 }
